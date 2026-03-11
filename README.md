@@ -1,17 +1,18 @@
-# edulift_india
+# Vidyavriksh
 
-A new Flutter project.
+Beginner-friendly Flutter learning app with Teacher and Student flows.
 
-## Getting Started
+## Run
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
+## Features
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Welcome and role selection screens
+- Teacher dashboard (courses, study material, quiz, GK, announcements, doubts, profile)
+- Student dashboard (learning, quiz, daily GK, score)
+- Demo account support for Teacher and Student
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
