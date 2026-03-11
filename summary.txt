@@ -1,0 +1,282 @@
+VIDYAVRIKSH APP - PROJECT SUMMARY (HANDOFF)
+
+Project Root:
+/Users/macbookpro/Documents/ADEV/App
+
+Purpose:
+A beginner-friendly Flutter learning app with two roles:
+1) Teacher: creates courses/material/quizzes/GK/announcements and views results.
+2) Student: logs in, learns, attempts quizzes, and tracks score.
+
+--------------------------------------------------
+1) IMPORTANT RUN/SETUP NOTES
+--------------------------------------------------
+- Flutter project uses Material 3.
+- Main entrypoint: lib/main.dart
+- Assets are enabled with: assets/
+- Current key dependencies:
+  - url_launcher
+  - image_picker
+  - file_picker (added for direct PDF selection from computer)
+
+Useful commands:
+- flutter pub get
+- flutter analyze
+- flutter test
+- flutter run
+
+Analyzer note:
+- analysis_options.yaml excludes:
+  - flutter/**
+  - build/**
+  - .dart_tool/**
+This prevents false errors from embedded Flutter SDK/dev/examples/packages folders.
+
+--------------------------------------------------
+2) APP FLOW
+--------------------------------------------------
+Route flow:
+- /welcome -> /select -> /auth(role)
+- If Teacher auth success -> /teacher-dashboard
+- If Student auth success -> /home
+
+main.dart routes:
+- /welcome
+- /select
+- /auth (via onGenerateRoute, role argument)
+- /home
+- /teacher-dashboard
+- /learning
+- /quiz
+- /gk
+- /score
+
+--------------------------------------------------
+3) FOLDER STRUCTURE (ACTIVE APP CODE)
+--------------------------------------------------
+lib/
+  main.dart
+  models/
+    app_user_model.dart
+    course_attempt_model.dart
+    course_post_model.dart
+    question_model.dart
+    teacher_result_model.dart
+  screens/
+    announcements_screen.dart
+    auth_screen.dart
+    create_course_screen.dart
+    create_quiz_screen.dart
+    gk_screen.dart
+    home_screen.dart
+    learning_screen.dart
+    post_daily_gk_screen.dart
+    quiz_screen.dart
+    score_screen.dart
+    select_screen.dart
+    student_doubts_screen.dart
+    student_results_screen.dart
+    teacher_dashboard_screen.dart
+    teacher_profile_screen.dart
+    upload_study_material_screen.dart
+    welcome_screen.dart
+  services/
+    data_service.dart
+  widgets/
+    app_back_button.dart
+    custom_button.dart
+
+Assets folder:
+assets/
+  logo_1.png
+  bg_1.png
+  bg_22.png
+  teacher_1.png
+
+--------------------------------------------------
+4) DATA LAYER (NO BACKEND; IN-MEMORY)
+--------------------------------------------------
+File: lib/services/data_service.dart
+
+This file acts as a dummy in-app database using static collections + ValueNotifier.
+
+Main stores/notifiers:
+- totalScoreNotifier: global student points
+- currentUserNotifier: logged-in AppUser
+- _usersDb: role+email keyed auth database
+- postedCoursesNotifier: teacher-created courses (CoursePost list)
+- studyMaterialsNotifier: List<Map<String, dynamic>> for uploaded materials
+- teacherQuizNotifier: teacher quiz questions
+- dailyGkPostsNotifier
+- announcementsNotifier
+- studentDoubtsNotifier
+- _attemptsDb: tracks course/quiz attempts and marks for teacher analytics
+
+Teacher results aggregation:
+- getTeacherResultSummary(teacherEmail)
+  returns students attempted course, attempted quiz, total marks, and per-student marks.
+
+--------------------------------------------------
+5) KEY MODELS
+--------------------------------------------------
+app_user_model.dart:
+- role, displayName, email, password, phoneNumber
+- courseName, subjectExpertise, bio
+- profileImageBytes
+- copyWith() for profile update
+
+course_post_model.dart:
+- id, teacherEmail, teacherName, courseName, courseDescription
+- textBlog, videoLink, quizType, quizContent
+- pdfFileName, pdfBytes (added for direct PDF upload storage)
+
+Other models:
+- question_model.dart: quiz/GK MCQ model
+- course_attempt_model.dart: per-student per-course attempts and marks
+- teacher_result_model.dart: result summary structures
+
+--------------------------------------------------
+6) SCREEN-BY-SCREEN SUMMARY
+--------------------------------------------------
+welcome_screen.dart
+- Shows logo + app name + loading circle.
+- Auto redirects to /select after delay.
+
+select_screen.dart
+- Role choice: Teacher / Student.
+- Uses bg_1.png background.
+
+auth_screen.dart
+- Shared login/signup screen for both roles.
+- Signup fields include:
+  - Full Name
+  - Phone No
+  - Subject Expertise (teacher only; renamed from "Your Course Name")
+  - Profile picture section with default image loaded from assets/teacher_1.png
+  - Choose Profile Picture button
+  - Email, Password, Re-Enter Password (added)
+- Login checks role/email/password and routes:
+  - Teacher -> /teacher-dashboard
+  - Student -> /home
+
+teacher_dashboard_screen.dart
+- Teacher top section: welcome + profile image.
+- Grid cards:
+  - Create Course
+  - Upload Study Material
+  - Create Quiz
+  - Post Daily GK
+  - View Student Results
+  - Announcements
+  - Student Doubts
+  - Edit Profile
+- Teacher dashboard background now uses bg_22.png (only this screen changed).
+
+create_course_screen.dart
+- Teacher module creation form:
+  - Course Title
+  - Description
+  - Subject Category (TEXT INPUT; dropdown removed)
+  - Difficulty Level (Beginner / Intermediate / Hard)
+  - YouTube Video Link
+  - Blog/Article Link
+  - PDF Notes Upload (direct PDF picker from computer via file_picker)
+- On submit creates CoursePost and stores in DataService.postedCoursesNotifier.
+
+upload_study_material_screen.dart
+- Fields:
+  - Title
+  - Subject
+  - Resource Type (PDF/Blog/Video)
+  - If PDF selected: direct PDF picker from computer
+  - If Blog/Video selected: URL input
+  - Short Description
+- Stores data in DataService.studyMaterialsNotifier.
+
+create_quiz_screen.dart
+- Teacher can prepare multiple questions in one batch.
+- New flow:
+  - Fill form -> "Add More Question" (stores in local draft list)
+  - "Save Quiz Questions" commits all draft/current questions to DataService
+- Shows stored quiz questions below.
+
+post_daily_gk_screen.dart
+- Teacher posts daily GK question + options + answer + points.
+
+announcements_screen.dart
+- Teacher posts announcements and sees list.
+
+student_doubts_screen.dart
+- Teacher sees student questions and can reply.
+
+student_results_screen.dart
+- Displays sample/dummy student results list.
+
+teacher_profile_screen.dart
+- Shows and edits teacher profile info (name, subject expertise, bio, image).
+
+home_screen.dart (student)
+- Student profile card + main entry buttons:
+  - Learning
+  - Quiz Section
+  - Daily GK
+  - View Score
+- Uses bg_1.png.
+
+learning_screen.dart (student)
+- Static free-learning topics with external links.
+- Uploaded Study Materials section from DataService.
+  - For PDF resources: shows PDF info button.
+  - For Blog/Video resources: opens URL.
+- Teacher Posted Courses section:
+  - Course details, video link, blog text, PDF info, attempt buttons.
+  - Records course attempt and quiz attempt marks.
+
+quiz_screen.dart
+- Student MCQ quiz experience from base question model.
+
+gk_screen.dart
+- Daily GK random question with scoring logic.
+
+score_screen.dart
+- Displays total points from ValueNotifier.
+
+--------------------------------------------------
+7) WIDGETS
+--------------------------------------------------
+app_back_button.dart
+- Reusable back button with optional fallback route.
+
+custom_button.dart
+- Reusable styled elevated button for home actions.
+
+--------------------------------------------------
+8) WHAT WAS CHANGED IN THIS UPDATE
+--------------------------------------------------
+Implemented requested tasks:
+1. Teacher signup label changed:
+   - "Your Course Name" -> "Subject Expertise"
+2. Added "Re-Enter Password" in signup for both Teacher and Student.
+3. Create Course subject category dropdown removed; replaced with typed text input.
+4. Added "Hard" option in difficulty level.
+5. Create Course PDF Notes Link removed; direct PDF picker upload added.
+6. Upload Study Material now supports direct PDF pick when type=PDF.
+7. Create Quiz now has "Add More Question" batch flow.
+8. Teacher dashboard background changed to assets/bg_22.png.
+9. This handoff file (summary.txt) created.
+
+--------------------------------------------------
+9) KNOWN LIMITATIONS / NEXT IMPROVEMENTS
+--------------------------------------------------
+- Storage is in-memory only; app restart clears all posted data.
+- PDF files are currently selected and stored as bytes but not opened with an in-app PDF viewer.
+- Auth has no encryption/backend; it is dummy demo logic.
+- Student results screen currently uses dummy list; can be replaced by DataService aggregated attempts.
+
+--------------------------------------------------
+10) TEST/QUALITY STATUS
+--------------------------------------------------
+Latest checks after updates:
+- flutter analyze -> No issues found.
+- flutter test -> All tests passed.
+
